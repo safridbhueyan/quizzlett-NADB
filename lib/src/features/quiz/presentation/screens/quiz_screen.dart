@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quizlett/core/constant/app_colors.dart';
+import 'package:quizlett/src/features/quiz/domain/quiz_models.dart';
 import 'package:quizlett/src/features/quiz/presentation/providers/quiz_provider.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
@@ -63,8 +64,56 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with SingleTickerProvid
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    if (quizState.status == QuizStatus.loading || quizState.status == QuizStatus.initial) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Loading Questions...',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (quizState.status == QuizStatus.error) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 60),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load questions',
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Go Back'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     if (quizState.category == null) {
-      return const Scaffold(body: Center(child: Text('Loading Category...')));
+      return const Scaffold(
+        body: Center(
+          child: Text('No active quiz category found.'),
+        ),
+      );
     }
 
     final currentQuestion = quizState.currentQuestion;
