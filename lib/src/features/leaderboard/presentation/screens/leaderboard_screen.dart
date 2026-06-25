@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quizlett/core/constant/app_colors.dart';
 import 'package:quizlett/src/features/auth/presentation/providers/auth_provider.dart';
 
@@ -18,6 +19,128 @@ class LeaderboardUser {
     this.isCurrentUser = false,
   });
 }
+
+final leaderboardProvider = StreamProvider<List<LeaderboardUser>>((ref) {
+  final authState = ref.watch(authControllerProvider);
+  final currentUserId = authState is Authenticated ? authState.user.uid : null;
+
+  return FirebaseFirestore.instance
+      .collection('users')
+      .orderBy('xp', descending: true)
+      .limit(50)
+      .snapshots()
+      .map((snapshot) {
+        final list = snapshot.docs.map<LeaderboardUser>((doc) {
+          final data = doc.data();
+          final uid = doc.id;
+          final name = data['displayName'] ?? 'User';
+          final xp = data['xp'] ?? 0;
+          final level = (xp / 100).floor() + 1;
+          final avatarUrl = data['photoUrl'];
+          
+          return LeaderboardUser(
+            name: name,
+            xp: xp,
+            level: level,
+            avatarUrl: avatarUrl,
+            isCurrentUser: uid == currentUserId,
+          );
+        }).toList();
+
+        // Ensure current user is in the list
+        final hasCurrentUser = list.any((u) => u.isCurrentUser);
+        if (!hasCurrentUser && authState is Authenticated) {
+          list.add(LeaderboardUser(
+            name: authState.user.displayName,
+            xp: authState.user.xp,
+            level: authState.user.level,
+            avatarUrl: authState.user.photoUrl,
+            isCurrentUser: true,
+          ));
+        }
+
+        // Sort first
+        list.sort((a, b) => b.xp.compareTo(a.xp));
+
+        // We want at least 10 users on the leaderboard to make it look full.
+        const targetLeaderboardCount = 10;
+        final realUserCount = list.length;
+        if (realUserCount < targetLeaderboardCount) {
+          final dummyCountNeeded = targetLeaderboardCount - realUserCount;
+          final dummyPool = [
+            const LeaderboardUser(
+              name: 'Sarah Connor',
+              xp: 480,
+              level: 5,
+              avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
+            ),
+            const LeaderboardUser(
+              name: 'Bruce Wayne',
+              xp: 380,
+              level: 4,
+              avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+            ),
+            const LeaderboardUser(
+              name: 'Tony Stark',
+              xp: 320,
+              level: 4,
+              avatarUrl: 'https://randomuser.me/api/portraits/men/46.jpg',
+            ),
+            const LeaderboardUser(
+              name: 'Clark Kent',
+              xp: 260,
+              level: 3,
+              avatarUrl: 'https://randomuser.me/api/portraits/men/85.jpg',
+            ),
+            const LeaderboardUser(
+              name: 'Peter Parker',
+              xp: 190,
+              level: 2,
+              avatarUrl: 'https://randomuser.me/api/portraits/men/22.jpg',
+            ),
+            const LeaderboardUser(
+              name: 'Selina Kyle',
+              xp: 150,
+              level: 2,
+              avatarUrl: 'https://randomuser.me/api/portraits/women/12.jpg',
+            ),
+            const LeaderboardUser(
+              name: 'Barry Allen',
+              xp: 110,
+              level: 2,
+              avatarUrl: 'https://randomuser.me/api/portraits/men/18.jpg',
+            ),
+            const LeaderboardUser(
+              name: 'Diana Prince',
+              xp: 80,
+              level: 1,
+              avatarUrl: 'https://randomuser.me/api/portraits/women/68.jpg',
+            ),
+            const LeaderboardUser(
+              name: 'Arthur Curry',
+              xp: 40,
+              level: 1,
+              avatarUrl: 'https://randomuser.me/api/portraits/men/62.jpg',
+            ),
+            const LeaderboardUser(
+              name: 'Hal Jordan',
+              xp: 20,
+              level: 1,
+              avatarUrl: 'https://randomuser.me/api/portraits/men/75.jpg',
+            ),
+          ];
+          
+          // Take the required amount of dummy users
+          final dummiesToAdd = dummyPool.take(dummyCountNeeded);
+          list.addAll(dummiesToAdd);
+          
+          // Re-sort the list with the added dummy users
+          list.sort((a, b) => b.xp.compareTo(a.xp));
+        }
+
+        return list;
+      });
+});
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
@@ -46,78 +169,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final authState = ref.watch(authControllerProvider);
+    final leaderboardAsync = ref.watch(leaderboardProvider);
 
     if (authState is! Authenticated) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    final currentUser = authState.user;
-
-    // Define standard global mock users
-    final baseMockUsers = [
-      const LeaderboardUser(
-        name: 'Sophia Martinez',
-        xp: 1420,
-        level: 15,
-        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-      ),
-      const LeaderboardUser(
-        name: 'Liam Johnson',
-        xp: 1150,
-        level: 12,
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-      ),
-      const LeaderboardUser(
-        name: 'Emma Watson',
-        xp: 980,
-        level: 10,
-        avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80',
-      ),
-      const LeaderboardUser(
-        name: 'Olivia Davis',
-        xp: 720,
-        level: 8,
-        avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
-      ),
-      const LeaderboardUser(
-        name: 'Noah Wilson',
-        xp: 610,
-        level: 7,
-        avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
-      ),
-      const LeaderboardUser(
-        name: 'Ava Brown',
-        xp: 480,
-        level: 5,
-        avatarUrl: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?auto=format&fit=crop&w=150&q=80',
-      ),
-    ];
-
-    // Add current user dynamically into list
-    final allUsers = List<LeaderboardUser>.from(baseMockUsers)
-      ..add(
-        LeaderboardUser(
-          name: currentUser.displayName,
-          xp: currentUser.xp,
-          level: currentUser.level,
-          avatarUrl: currentUser.photoUrl,
-          isCurrentUser: true,
-        ),
-      );
-
-    // Sort by XP descending
-    allUsers.sort((a, b) => b.xp.compareTo(a.xp));
-
-    // Split into Top 3 and Rest
-    final top3 = allUsers.take(3).toList();
-    final restUsers = allUsers.skip(3).toList();
-
-    // Reorder top 3 for podium visualization: [Rank 2, Rank 1, Rank 3]
-    List<LeaderboardUser?> podiumUsers = [null, null, null];
-    if (top3.isNotEmpty) {
-      if (top3.length > 1) podiumUsers[0] = top3[1]; // Rank 2
-      podiumUsers[1] = top3[0];                      // Rank 1
-      if (top3.length > 2) podiumUsers[2] = top3[2]; // Rank 3
     }
 
     return Scaffold(
@@ -134,80 +189,126 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: List.generate(3, (tabIdx) {
-          // In a real app, data would filter based on tab index. Here we show sorted list.
-          return Column(
-            children: [
-              const SizedBox(height: 12),
-              // 1. Podium Section
-              Container(
-                height: 240,
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // Rank 2 Podium
-                    Expanded(
-                      child: podiumUsers[0] != null
-                          ? _buildPodiumColumn(context, podiumUsers[0]!, 2, 110.0, const Color(0xFF94A3B8))
-                          : const SizedBox(),
-                    ),
-                    // Rank 1 Podium
-                    Expanded(
-                      child: podiumUsers[1] != null
-                          ? _buildPodiumColumn(context, podiumUsers[1]!, 1, 140.0, const Color(0xFFF59E0B))
-                          : const SizedBox(),
-                    ),
-                    // Rank 3 Podium
-                    Expanded(
-                      child: podiumUsers[2] != null
-                          ? _buildPodiumColumn(context, podiumUsers[2]!, 3, 90.0, const Color(0xFFD97706))
-                          : const SizedBox(),
-                    ),
-                  ],
+      body: leaderboardAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 60),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load leaderboard',
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
-              ),
-              const SizedBox(height: 16),
-              
-              // 2. Rankings List Section
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.surfaceDark : Colors.white,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(32),
-                      topRight: Radius.circular(32),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => ref.refresh(leaderboardProvider),
+                  child: const Text('Try Again'),
+                ),
+              ],
+            ),
+          ),
+        ),
+        data: (allUsers) {
+          // Split into Top 3 and Rest
+          final top3 = allUsers.take(3).toList();
+          final restUsers = allUsers.skip(3).toList();
+
+          // Reorder top 3 for podium visualization: [Rank 2, Rank 1, Rank 3]
+          List<LeaderboardUser?> podiumUsers = [null, null, null];
+          if (top3.isNotEmpty) {
+            if (top3.length > 1) podiumUsers[0] = top3[1]; // Rank 2
+            podiumUsers[1] = top3[0];                      // Rank 1
+            if (top3.length > 2) podiumUsers[2] = top3[2]; // Rank 3
+          }
+
+          return TabBarView(
+            controller: _tabController,
+            children: List.generate(3, (tabIdx) {
+              return Column(
+                children: [
+                  const SizedBox(height: 12),
+                  // 1. Podium Section
+                  Container(
+                    height: 290,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Rank 2 Podium
+                        Expanded(
+                          child: podiumUsers[0] != null
+                              ? _buildPodiumColumn(context, podiumUsers[0]!, 2, 110.0, const Color(0xFF94A3B8))
+                              : const SizedBox(),
+                        ),
+                        // Rank 1 Podium
+                        Expanded(
+                          child: podiumUsers[1] != null
+                              ? _buildPodiumColumn(context, podiumUsers[1]!, 1, 140.0, const Color(0xFFF59E0B))
+                              : const SizedBox(),
+                        ),
+                        // Rank 3 Podium
+                        Expanded(
+                          child: podiumUsers[2] != null
+                              ? _buildPodiumColumn(context, podiumUsers[2]!, 3, 90.0, const Color(0xFFD97706))
+                              : const SizedBox(),
+                        ),
+                      ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                        blurRadius: 15,
-                        offset: const Offset(0, -5),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // 2. Rankings List Section
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.surfaceDark : Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(32),
+                          topRight: Radius.circular(32),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                            blurRadius: 15,
+                            offset: const Offset(0, -5),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: ListView.separated(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 80),
-                    itemCount: restUsers.length,
-                    separatorBuilder: (context, index) => Divider(
-                      color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.borderLight,
-                      height: 1,
+                      child: restUsers.isEmpty
+                          ? const Center(
+                              child: Text('No additional rankings yet.'),
+                            )
+                          : ListView.separated(
+                              physics: const BouncingScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(24, 24, 24, 80),
+                              itemCount: restUsers.length,
+                              separatorBuilder: (context, index) => Divider(
+                                color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.borderLight,
+                                height: 1,
+                              ),
+                              itemBuilder: (context, index) {
+                                final user = restUsers[index];
+                                final rank = index + 4;
+                                return _buildLeaderboardTile(context, user, rank);
+                              },
+                            ),
                     ),
-                    itemBuilder: (context, index) {
-                      final user = restUsers[index];
-                      // Rank number is index + 4
-                      final rank = index + 4;
-                      return _buildLeaderboardTile(context, user, rank);
-                    },
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            }),
           );
-        }),
+        },
       ),
     );
   }
