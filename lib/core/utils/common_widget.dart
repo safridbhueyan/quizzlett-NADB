@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:quizlett/core/constant/app_padding.dart';
-import 'package:quizlett/core/routes/route_name.dart';
 import 'package:quizlett/core/theme/theme_parts/app_color.dart';
 
 class CommonWidget {
