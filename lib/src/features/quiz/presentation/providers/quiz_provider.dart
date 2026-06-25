@@ -1,224 +1,71 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/quiz_models.dart';
 
-final quizCategoriesProvider = Provider<List<QuizCategory>>((ref) {
-  return [
-    const QuizCategory(
-      id: 'science-tech',
-      title: 'Science & Tech',
-      description: 'Test your knowledge on computers, coding, and the physical sciences.',
-      icon: Icons.biotech_rounded,
-      color: Color(0xFF6366F1),
-      questions: [
-        Question(
-          id: 'st-1',
-          text: 'What does "API" stand for in software development?',
-          options: [
-            'Application Programming Interface',
-            'Advanced Protocol Integration',
-            'Access Program Identifier',
-            'Automated Process Interconnection'
-          ],
-          correctOptionIndex: 0,
-          points: 10,
-          explanation: 'API stands for Application Programming Interface. It is a set of defined rules that enable different applications to communicate with each other.',
-        ),
-        Question(
-          id: 'st-2',
-          text: 'Which programming language is Flutter written in?',
-          options: ['Java', 'Swift', 'Dart', 'Kotlin'],
-          correctOptionIndex: 2,
-          points: 10,
-          explanation: 'Flutter is written in Dart, a client-optimized programming language created by Google for fast apps on multiple platforms.',
-        ),
-        Question(
-          id: 'st-3',
-          text: 'What is the speed of light in a vacuum?',
-          options: [
-            '~300,000 km/s',
-            '~150,000 km/s',
-            '~500,000 km/s',
-            '~1,000,000 km/s'
-          ],
-          correctOptionIndex: 0,
-          points: 15,
-          explanation: 'The speed of light in a vacuum is exactly 299,792,458 meters per second, which is approximately 300,000 kilometers per second.',
-        ),
-        Question(
-          id: 'st-4',
-          text: 'Which HTML tag is used to link an external JavaScript file?',
-          options: ['<link>', '<script>', '<js>', '<style>'],
-          correctOptionIndex: 1,
-          points: 10,
-          explanation: 'The <script> HTML tag is used to embed or reference executable JavaScript code, both inline and external.',
-        ),
-        Question(
-          id: 'st-5',
-          text: 'What does CPU stand for?',
-          options: [
-            'Central Process Unit',
-            'Computer Personal Unit',
-            'Central Processing Unit',
-            'Control Power Unit'
-          ],
-          correctOptionIndex: 2,
-          points: 10,
-          explanation: 'The CPU (Central Processing Unit) is the primary component of a computer that acts as its "brain", executing instructions of a computer program.',
-        ),
-      ],
-    ),
-    const QuizCategory(
-      id: 'space-astronomy',
-      title: 'Space & Cosmos',
-      description: 'Explore the mysteries of stars, galaxies, black holes, and the solar system.',
-      icon: Icons.rocket_launch_rounded,
-      color: Color(0xFF8B5CF6),
-      questions: [
-        Question(
-          id: 'sp-1',
-          text: 'What is the largest planet in our Solar System?',
-          options: ['Saturn', 'Jupiter', 'Neptune', 'Earth'],
-          correctOptionIndex: 1,
-          points: 10,
-          explanation: 'Jupiter is the fifth planet from the Sun and the largest in the Solar System, with a mass more than two and a half times that of all the other planets combined.',
-        ),
-        Question(
-          id: 'sp-2',
-          text: 'Which galaxy is closest to our Milky Way?',
-          options: ['Andromeda', 'Triangulum', 'Large Magellanic Cloud', 'Sombrero'],
-          correctOptionIndex: 0,
-          points: 15,
-          explanation: 'The Andromeda Galaxy is the closest major galaxy to our Milky Way and is on a collision course with it in about 4.5 billion years.',
-        ),
-        Question(
-          id: 'sp-3',
-          text: 'What is the hottest planet in our solar system?',
-          options: ['Mercury', 'Mars', 'Venus', 'Jupiter'],
-          correctOptionIndex: 2,
-          points: 10,
-          explanation: 'Venus is the hottest planet in the Solar System, with surface temperatures reaching 462°C (864°F) due to a thick, runaway greenhouse effect atmosphere.',
-        ),
-        Question(
-          id: 'sp-4',
-          text: 'How many planets are in our solar system?',
-          options: ['7', '8', '9', '10'],
-          correctOptionIndex: 1,
-          points: 10,
-          explanation: 'There are 8 planets in our solar system: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune (Pluto was reclassified as a dwarf planet in 2006).',
-        ),
-        Question(
-          id: 'sp-5',
-          text: 'Who was the first human to travel into outer space?',
-          options: ['Neil Armstrong', 'Yuri Gagarin', 'Buzz Aldrin', 'Alan Shepard'],
-          correctOptionIndex: 1,
-          points: 15,
-          explanation: 'Soviet cosmonaut Yuri Gagarin became the first human in space on April 12, 1961, orbiting Earth in Vostok 1.',
-        ),
-      ],
-    ),
-    const QuizCategory(
-      id: 'geography-culture',
-      title: 'Geography & Landmarks',
-      description: 'Journey across the globe to discover capitals, rivers, oceans, and monuments.',
-      icon: Icons.public_rounded,
-      color: Color(0xFF10B981),
-      questions: [
-        Question(
-          id: 'geo-1',
-          text: 'What is the capital of Japan?',
-          options: ['Kyoto', 'Osaka', 'Tokyo', 'Hiroshima'],
-          correctOptionIndex: 2,
-          points: 10,
-          explanation: 'Tokyo is the capital and most populous prefecture of Japan, located on the eastern coast of the main island, Honshu.',
-        ),
-        Question(
-          id: 'geo-2',
-          text: 'Which is the longest river in the world?',
-          options: ['Amazon River', 'Nile River', 'Yangtze River', 'Mississippi River'],
-          correctOptionIndex: 1,
-          points: 15,
-          explanation: 'The Nile is traditionally considered the longest river in the world, spanning about 6,650 kilometers (4,130 miles) through northeastern Africa.',
-        ),
-        Question(
-          id: 'geo-3',
-          text: 'What is the smallest country in the world by land area?',
-          options: ['Monaco', 'San Marino', 'Vatican City', 'Liechtenstein'],
-          correctOptionIndex: 2,
-          points: 15,
-          explanation: 'Vatican City is the smallest independent state in the world, both by area (approx. 0.49 sq km) and population, located entirely within Rome, Italy.',
-        ),
-        Question(
-          id: 'geo-4',
-          text: 'Which ocean is the largest on Earth?',
-          options: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean', 'Pacific Ocean'],
-          correctOptionIndex: 3,
-          points: 10,
-          explanation: 'The Pacific Ocean is the largest and deepest of Earth\'s oceanic divisions, extending from the Arctic Ocean in the north to the Southern Ocean in the south.',
-        ),
-        Question(
-          id: 'geo-5',
-          text: 'Mount Everest is situated in which mountain range?',
-          options: ['Andes', 'Alps', 'Himalayas', 'Rockies'],
-          correctOptionIndex: 2,
-          points: 10,
-          explanation: 'Mount Everest, the earth\'s highest mountain above sea level, is located in the Mahalangur Himal sub-range of the Himalayas, on the border between Nepal and China.',
-        ),
-      ],
-    ),
-    const QuizCategory(
-      id: 'pop-culture',
-      title: 'Pop Culture & Media',
-      description: 'Test your trivia skills on blockbusters, TV shows, music, and creators.',
-      icon: Icons.movie_creation_rounded,
-      color: Color(0xFFF59E0B),
-      questions: [
-        Question(
-          id: 'pc-1',
-          text: 'Who played Iron Man / Tony Stark in the Marvel Cinematic Universe?',
-          options: ['Chris Evans', 'Robert Downey Jr.', 'Chris Hemsworth', 'Mark Ruffalo'],
-          correctOptionIndex: 1,
-          points: 10,
-          explanation: 'Robert Downey Jr. portrayed Tony Stark / Iron Man, starting with the 2008 film Iron Man, kickstarting the massive MCU franchise.',
-        ),
-        Question(
-          id: 'pc-2',
-          text: 'What is the name of the fictional continent in Game of Thrones?',
-          options: ['Middle-earth', 'Essos', 'Westeros', 'Narnia'],
-          correctOptionIndex: 2,
-          points: 10,
-          explanation: 'Most of the story in Game of Thrones takes place on the continent of Westeros, with some arcs happening in the eastern continent of Essos.',
-        ),
-        Question(
-          id: 'pc-3',
-          text: 'How many Academy Awards (Oscars) did the 1997 movie "Titanic" win?',
-          options: ['9', '11', '13', '15'],
-          correctOptionIndex: 1,
-          points: 15,
-          explanation: 'Titanic won 11 Academy Awards in 1998, tying the record with Ben-Hur for the most Oscar wins by a single film.',
-        ),
-        Question(
-          id: 'pc-4',
-          text: 'Which space opera movie features the iconic phrase "May the Force be with you"?',
-          options: ['Star Trek', 'Dune', 'Star Wars', 'Interstellar'],
-          correctOptionIndex: 2,
-          points: 10,
-          explanation: '"May the Force be with you" is one of the most famous quotes from the Star Wars franchise, used to wish good luck or safety to individuals.',
-        ),
-        Question(
-          id: 'pc-5',
-          text: 'Who is the creator of the Harry Potter book series?',
-          options: ['J.R.R. Tolkien', 'George R.R. Martin', 'J.K. Rowling', 'C.S. Lewis'],
-          correctOptionIndex: 2,
-          points: 10,
-          explanation: 'J.K. Rowling is the British author who wrote the seven-book Harry Potter fantasy series, which has sold over 600 million copies worldwide.',
-        ),
-      ],
-    ),
-  ];
+IconData _getIconForCategory(String name) {
+  switch (name.toLowerCase()) {
+    case 'math':
+      return Icons.calculate_rounded;
+    case 'general knowledge':
+      return Icons.lightbulb_rounded;
+    case 'physics':
+      return Icons.science_rounded;
+    case 'biology':
+      return Icons.yard_rounded;
+    case 'chemistry':
+      return Icons.biotech_rounded;
+    case 'computer':
+      return Icons.computer_rounded;
+    default:
+      return Icons.quiz_rounded;
+  }
+}
+
+Color _getColorForCategory(String name) {
+  switch (name.toLowerCase()) {
+    case 'math':
+      return const Color(0xFF6366F1); // Indigo
+    case 'general knowledge':
+      return const Color(0xFFF59E0B); // Amber
+    case 'physics':
+      return const Color(0xFF8B5CF6); // Violet
+    case 'biology':
+      return const Color(0xFF10B981); // Emerald
+    case 'chemistry':
+      return const Color(0xFFEC4899); // Pink
+    case 'computer':
+      return const Color(0xFF3B82F6); // Blue
+    default:
+      return const Color(0xFF6366F1);
+  }
+}
+
+final quizCategoriesProvider = FutureProvider<List<QuizCategory>>((ref) async {
+  final response = await http.get(Uri.parse('https://sadiks-quiz-apihub.lovable.app/api/v1/categories'));
+  if (response.statusCode == 200) {
+    final body = json.decode(response.body);
+    if (body['success'] == true) {
+      final List data = body['data'] ?? [];
+      return data.map<QuizCategory>((item) {
+        final name = item['name'] ?? '';
+        return QuizCategory(
+          id: item['id'].toString(),
+          title: name,
+          description: item['description'] ?? '',
+          icon: _getIconForCategory(name),
+          color: _getColorForCategory(name),
+          questions: const [], // Load questions dynamically when starting quiz
+        );
+      }).toList();
+    }
+  }
+  throw Exception('Failed to load categories');
 });
+
 
 class QuizController extends StateNotifier<QuizSessionState> {
   QuizController(this._ref) : super(const QuizSessionState());
@@ -232,11 +79,11 @@ class QuizController extends StateNotifier<QuizSessionState> {
     super.dispose();
   }
 
-  void startQuiz(QuizCategory category) {
+  Future<void> startQuiz(QuizCategory category) async {
     _timer?.cancel();
     state = QuizSessionState(
       category: category,
-      status: QuizStatus.inProgress,
+      status: QuizStatus.loading,
       currentQuestionIndex: 0,
       chosenAnswers: {},
       score: 0,
@@ -245,7 +92,54 @@ class QuizController extends StateNotifier<QuizSessionState> {
       timeRemaining: 15,
       elapsedSeconds: 0,
     );
-    _startTimer();
+
+    try {
+      final response = await http.get(Uri.parse('https://sadiks-quiz-apihub.lovable.app/api/v1/categories/${category.id}/questions'));
+      if (response.statusCode == 200) {
+        final body = json.decode(response.body);
+        if (body['success'] == true) {
+          final List data = body['data'] ?? [];
+          final List<Question> questions = data.map<Question>((q) {
+            final List<String> opts = List<String>.from(q['options'] ?? []);
+            final int ansIdx = q['answerIndex'] ?? 0;
+            return Question(
+              id: q['id'].toString(),
+              text: q['question'] ?? '',
+              options: opts,
+              correctOptionIndex: ansIdx,
+              points: q['mark'] ?? 10,
+              explanation: 'The correct answer is ${opts.isNotEmpty && ansIdx < opts.length ? opts[ansIdx] : "option ${String.fromCharCode(65 + ansIdx)}"}.',
+            );
+          }).toList();
+
+          final categoryWithQuestions = QuizCategory(
+            id: category.id,
+            title: category.title,
+            description: category.description,
+            icon: category.icon,
+            color: category.color,
+            questions: questions,
+          );
+
+          state = QuizSessionState(
+            category: categoryWithQuestions,
+            status: QuizStatus.inProgress,
+            currentQuestionIndex: 0,
+            chosenAnswers: {},
+            score: 0,
+            currentStreak: 0,
+            maxStreak: 0,
+            timeRemaining: 15,
+            elapsedSeconds: 0,
+          );
+          _startTimer();
+          return;
+        }
+      }
+      throw Exception('Failed to load questions');
+    } catch (e) {
+      state = state.copyWith(status: QuizStatus.error);
+    }
   }
 
   void selectAnswer(int optionIndex) {
