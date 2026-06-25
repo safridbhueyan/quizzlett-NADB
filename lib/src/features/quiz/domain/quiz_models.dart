@@ -36,7 +36,7 @@ class QuizCategory {
   });
 }
 
-enum QuizStatus { initial, inProgress, completed }
+enum QuizStatus { initial, loading, inProgress, completed, error }
 
 class QuizSessionState {
   final QuizCategory? category;
