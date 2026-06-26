@@ -12,15 +12,16 @@ class AuthScreen extends ConsumerStatefulWidget {
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStateMixin {
+class _AuthScreenState extends ConsumerState<AuthScreen>
+    with TickerProviderStateMixin {
   late final AnimationController _bgController;
   late final AnimationController _formController;
-  
+
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
-  
+
   bool _isLogin = true;
   bool _obscurePassword = true;
 
@@ -88,7 +89,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
             content: Text(next.message),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -108,7 +111,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
               },
             ),
           ),
-          
+
           // 2. Glassmorphism Blur Backdrop
           Positioned.fill(
             child: BackdropFilter(
@@ -143,7 +146,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primary.withValues(alpha: 0.3),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                 ),
@@ -157,7 +162,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Quizy',
+                            'Quizzlett',
                             style: theme.textTheme.displayMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
@@ -167,7 +172,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                           Text(
                             'Test your mind, level up your knowledge',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight,
                             ),
                           ),
                         ],
@@ -190,13 +197,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                       child: Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: isDark 
-                              ? Colors.white.withValues(alpha: 0.05) 
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.05)
                               : Colors.white.withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(28),
                           border: Border.all(
-                            color: isDark 
-                                ? Colors.white.withValues(alpha: 0.08) 
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
                                 : Colors.white.withValues(alpha: 0.4),
                             width: 1.5,
                           ),
@@ -220,17 +227,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              
+
                               if (!_isLogin) ...[
                                 TextFormField(
                                   controller: _nameController,
                                   decoration: const InputDecoration(
                                     labelText: 'Full Name',
-                                    prefixIcon: Icon(Icons.person_outline_rounded),
+                                    prefixIcon: Icon(
+                                      Icons.person_outline_rounded,
+                                    ),
                                     hintText: 'Enter your name',
                                   ),
-                                  validator: (value) => value == null || value.trim().isEmpty 
-                                      ? 'Please enter your name' 
+                                  validator: (value) =>
+                                      value == null || value.trim().isEmpty
+                                      ? 'Please enter your name'
                                       : null,
                                 ),
                                 const SizedBox(height: 16),
@@ -261,33 +271,46 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                                 obscureText: _obscurePassword,
                                 decoration: InputDecoration(
                                   labelText: 'Password',
-                                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                                  prefixIcon: const Icon(
+                                    Icons.lock_outline_rounded,
+                                  ),
                                   hintText: '••••••••',
                                   suffixIcon: IconButton(
                                     icon: Icon(
-                                      _obscurePassword 
-                                          ? Icons.visibility_outlined 
+                                      _obscurePassword
+                                          ? Icons.visibility_outlined
                                           : Icons.visibility_off_outlined,
                                     ),
-                                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                    onPressed: () => setState(
+                                      () =>
+                                          _obscurePassword = !_obscurePassword,
+                                    ),
                                   ),
                                 ),
-                                validator: (value) => value == null || value.length < 6 
-                                    ? 'Password must be at least 6 characters' 
+                                validator: (value) =>
+                                    value == null || value.length < 6
+                                    ? 'Password must be at least 6 characters'
                                     : null,
                               ),
                               const SizedBox(height: 24),
 
                               // Submit Button
                               ElevatedButton(
-                                onPressed: authState is AuthLoading ? null : _submit,
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 18),
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                ).copyWith(
-                                  backgroundColor: WidgetStateProperty.all(AppColors.primary),
-                                ),
+                                onPressed: authState is AuthLoading
+                                    ? null
+                                    : _submit,
+                                style:
+                                    ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 18,
+                                      ),
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                    ).copyWith(
+                                      backgroundColor: WidgetStateProperty.all(
+                                        AppColors.primary,
+                                      ),
+                                    ),
                                 child: Ink(
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
@@ -303,7 +326,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                                             width: 20,
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Colors.white,
+                                                  ),
                                             ),
                                           )
                                         : Text(
@@ -329,7 +355,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                       children: [
                         Expanded(
                           child: Divider(
-                            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.1)
+                                : Colors.black.withValues(alpha: 0.1),
                             thickness: 1,
                           ),
                         ),
@@ -344,7 +372,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                         ),
                         Expanded(
                           child: Divider(
-                            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.1)
+                                : Colors.black.withValues(alpha: 0.1),
                             thickness: 1,
                           ),
                         ),
@@ -354,15 +384,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
 
                     // 5. Google Login Button
                     OutlinedButton(
-                      onPressed: authState is AuthLoading 
-                          ? null 
-                          : () => ref.read(authControllerProvider.notifier).signInWithGoogle(),
+                      onPressed: authState is AuthLoading
+                          ? null
+                          : () => ref
+                                .read(authControllerProvider.notifier)
+                                .signInWithGoogle(),
                       style: OutlinedButton.styleFrom(
-                        backgroundColor: isDark 
-                            ? Colors.white.withValues(alpha: 0.03) 
+                        backgroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.03)
                             : Colors.white.withValues(alpha: 0.8),
                         side: BorderSide(
-                          color: isDark ? Colors.white.withValues(alpha: 0.08) : AppColors.borderLight,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : AppColors.borderLight,
                           width: 1.5,
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -380,7 +414,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                              color: isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimaryLight,
                             ),
                           ),
                         ],
@@ -393,7 +429,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with TickerProviderStat
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          _isLogin ? "Don't have an account? " : "Already have an account? ",
+                          _isLogin
+                              ? "Don't have an account? "
+                              : "Already have an account? ",
                           style: theme.textTheme.bodyMedium,
                         ),
                         GestureDetector(
@@ -426,7 +464,7 @@ class _GoogleIconPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double w = size.width;
     final double r = w / 2;
-    
+
     final paint = Paint()
       ..style = PaintingStyle.fill
       ..isAntiAlias = true;
@@ -463,7 +501,7 @@ class _GoogleIconPainter extends CustomPainter {
       ..arcTo(
         Rect.fromCircle(center: Offset(r, r), radius: r),
         math.pi / 4,
-        math.pi * 3/4,
+        math.pi * 3 / 4,
         false,
       )
       ..lineTo(r, r)
@@ -478,7 +516,7 @@ class _GoogleIconPainter extends CustomPainter {
       ..arcTo(
         Rect.fromCircle(center: Offset(r, r), radius: r),
         math.pi,
-        math.pi * 1/4,
+        math.pi * 1 / 4,
         false,
       )
       ..lineTo(r, r)
@@ -493,8 +531,8 @@ class _GoogleIconPainter extends CustomPainter {
       ..lineTo(r - r * math.cos(math.pi / 4), r - r * math.sin(math.pi / 4))
       ..arcTo(
         Rect.fromCircle(center: Offset(r, r), radius: r),
-        math.pi * 5/4,
-        math.pi * 3/4,
+        math.pi * 5 / 4,
+        math.pi * 3 / 4,
         false,
       )
       ..lineTo(r, r)
@@ -522,7 +560,7 @@ class _MeshBgPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
-    
+
     // Draw base dark/light background
     final bgPaint = Paint()
       ..color = isDark ? AppColors.bgDark : AppColors.bgLight;
@@ -536,12 +574,15 @@ class _MeshBgPainter extends CustomPainter {
       size.height * (0.2 + 0.1 * math.cos(phase * 1.2)),
     );
     final paint1 = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.2),
-          AppColors.primary.withValues(alpha: 0),
-        ],
-      ).createShader(Rect.fromCircle(center: offset1, radius: size.width * 0.75));
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.2),
+              AppColors.primary.withValues(alpha: 0),
+            ],
+          ).createShader(
+            Rect.fromCircle(center: offset1, radius: size.width * 0.75),
+          );
     canvas.drawCircle(offset1, size.width * 0.75, paint1);
 
     // Second bubble (Rose/Pink)
@@ -550,12 +591,15 @@ class _MeshBgPainter extends CustomPainter {
       size.height * (0.75 + 0.15 * math.sin(phase * 1.5)),
     );
     final paint2 = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.secondary.withValues(alpha: isDark ? 0.2 : 0.15),
-          AppColors.secondary.withValues(alpha: 0),
-        ],
-      ).createShader(Rect.fromCircle(center: offset2, radius: size.width * 0.7));
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.secondary.withValues(alpha: isDark ? 0.2 : 0.15),
+              AppColors.secondary.withValues(alpha: 0),
+            ],
+          ).createShader(
+            Rect.fromCircle(center: offset2, radius: size.width * 0.7),
+          );
     canvas.drawCircle(offset2, size.width * 0.7, paint2);
 
     // Third bubble (Teal/Violet)
@@ -564,17 +608,21 @@ class _MeshBgPainter extends CustomPainter {
       size.height * (0.8 + 0.1 * math.sin(phase * 0.9)),
     );
     final paint3 = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          AppColors.tertiary.withValues(alpha: isDark ? 0.15 : 0.12),
-          AppColors.tertiary.withValues(alpha: 0),
-        ],
-      ).createShader(Rect.fromCircle(center: offset3, radius: size.width * 0.5));
+      ..shader =
+          RadialGradient(
+            colors: [
+              AppColors.tertiary.withValues(alpha: isDark ? 0.15 : 0.12),
+              AppColors.tertiary.withValues(alpha: 0),
+            ],
+          ).createShader(
+            Rect.fromCircle(center: offset3, radius: size.width * 0.5),
+          );
     canvas.drawCircle(offset3, size.width * 0.5, paint3);
   }
 
   @override
   bool shouldRepaint(covariant _MeshBgPainter oldDelegate) {
-    return oldDelegate.animationValue != animationValue || oldDelegate.isDark != isDark;
+    return oldDelegate.animationValue != animationValue ||
+        oldDelegate.isDark != isDark;
   }
 }
